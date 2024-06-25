@@ -33,7 +33,7 @@ docker network create i_cd_network
 docker run --network=ci_cd_network  -d -p 8081:8081 -p 8082:8082 -p 8083:8083 --name nexus-repository -v nexus-data:/nexus-data sonatype/nexus3
 ```
 #### Configurara Nexus para ir por http
-```json
+```sh
 echo '{ "insecure-registries": [ "http://192.168.100.10/:8082","http://192.168.100.10/:8083" ] }' > /etc/docker/deamon.json | systemctl reaload docker
 echo '{ "insecure-registries": [ "IP_DE_NEXUS:8082","IP_DE_NEXUS:8082" ] }' > /etc/docker/deamon.json # systemctl reload docker
 ```
