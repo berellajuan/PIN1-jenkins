@@ -14,7 +14,7 @@ pipeline {
         stage('Build') { /* Etapa de construcción de la imagen de Docker */
             steps {
                 script {
-                    newApp = docker.build "juanbe96/$IMAGEN:$BUILD_NUMBER" /* Construimos la imagen de Docker con un nombre único basado en el número de compilación */
+                    newApp = docker.build "grupo13/pin1/$IMAGEN:$BUILD_NUMBER" /* Construimos la imagen de Docker con un nombre único basado en el número de compilación */
                 }
             }
         }
@@ -30,7 +30,7 @@ pipeline {
         stage('Test') { /* Etapa de pruebas */
             steps {
                 script {
-                    docker.image("juanbe96/$IMAGEN:$BUILD_NUMBER").inside('-u root') { /* Ejecutamos un contenedor de Docker con la imagen construida */
+                    docker.image("grupo13/pin1/$IMAGEN:$BUILD_NUMBER").inside('-u root') { /* Ejecutamos un contenedor de Docker con la imagen construida */
                            sh 'nginx -v' /* Cambiamos el comando a 'nginx -v' para verificar la versión de nginx dentro del contenedor */
                         }
                     }
@@ -49,7 +49,7 @@ pipeline {
         
         stage('Clean Up') { /* Etapa de limpieza */
             steps {
-                sh "docker rmi -f juanbe96/$IMAGEN:$BUILD_NUMBER" /* Eliminamos la imagen de Docker localmente */
+                sh "docker rmi -f grupo13/pin1/$IMAGEN:$BUILD_NUMBER" /* Eliminamos la imagen de Docker localmente */
             }
         }
     }
