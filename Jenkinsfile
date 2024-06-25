@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script { /* Ejecutamos un contenedor de Trivy para escanear la imagen de Docker */
                     sh '''
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ aquasec/trivy:latest image juanbe96/$IMAGEN:$BUILD_NUMBER
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ aquasec/trivy:latest image grupo13/pin1/$IMAGEN:$BUILD_NUMBER
                     ''' 
                 }
             }
