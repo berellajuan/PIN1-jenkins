@@ -40,7 +40,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    docker.withRegistry( 'http://127.0.0.1:8082', USUARIO ) { /* Autenticamos con Nexus Local utilizando el nombre de usuario */
+                    docker.withRegistry( 'http://127.0.0.1:8083', USUARIO ) { /* Autenticamos con Nexus Local utilizando el nombre de usuario */
                         newApp.push() /* Subimos la imagen de Docker a Nexus -> docker-hosted */
                     }
                 }
