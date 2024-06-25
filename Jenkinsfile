@@ -3,6 +3,7 @@ pipeline {
         /* Definimos las variables de entorno */
         IMAGEN = "nginx" /* Cambiamos el nombre de la imagen de Docker a nginx */
         USUARIO = 'NEXUS_CREDENTIAL' /* Nombre de usuario de Docker Hub */
+        NEXUS_GROUP= 'grupo13/pin1'
     }
     agent any /* Indicamos que el agente puede ser cualquiera de los disponibles, en este caso el que tenga Docker instalado */
     stages { /* Definimos las etapas del pipeline */
@@ -14,7 +15,7 @@ pipeline {
         stage('Build') { /* Etapa de construcción de la imagen de Docker */
             steps {
                 script {
-                    newApp = docker.build "grupo13/pin1/$IMAGEN:$BUILD_NUMBER" /* Construimos la imagen de Docker con un nombre único basado en el número de compilación */
+                    newApp = docker.build "$NEXUS_GROUP/$IMAGEN:$BUILD_NUMBER" /* Construimos la imagen de Docker con un nombre único basado en el número de compilación */
                 }
             }
         }
@@ -22,7 +23,7 @@ pipeline {
             steps {
                 script { /* Ejecutamos un contenedor de Trivy para escanear la imagen de Docker */
                     sh '''
-                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ aquasec/trivy:latest image grupo13/pin1/$IMAGEN:$BUILD_NUMBER
+                    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $HOME/.cache:/root/.cache/ aquasec/trivy:latest image $NEXUS_GROUP/$IMAGEN:$BUILD_NUMBER
                     ''' 
                 }
             }
@@ -30,7 +31,7 @@ pipeline {
         stage('Test') { /* Etapa de pruebas */
             steps {
                 script {
-                    docker.image("grupo13/pin1/$IMAGEN:$BUILD_NUMBER").inside('-u root') { /* Ejecutamos un contenedor de Docker con la imagen construida */
+                    docker.image("$NEXUS_GROUP/$IMAGEN:$BUILD_NUMBER").inside('-u root') { /* Ejecutamos un contenedor de Docker con la imagen construida */
                            sh 'nginx -v' /* Cambiamos el comando a 'nginx -v' para verificar la versión de nginx dentro del contenedor */
                         }
                     }
@@ -49,7 +50,7 @@ pipeline {
         
         stage('Clean Up') { /* Etapa de limpieza */
             steps {
-                sh "docker rmi -f grupo13/pin1/$IMAGEN:$BUILD_NUMBER" /* Eliminamos la imagen de Docker localmente */
+                sh "docker rmi -f $NEXUS_GROUP/$IMAGEN:$BUILD_NUMBER" /* Eliminamos la imagen de Docker localmente */
             }
         }
     }
