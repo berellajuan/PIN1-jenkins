@@ -32,14 +32,14 @@ docker network create i_cd_network
 ```sh
 docker run --network=ci_cd_network  -d -p 8081:8081 -p 8082:8082 -p 8083:8083 --name nexus-repository -v nexus-data:/nexus-data sonatype/nexus3
 ```
-
-## JENKINS IMAGE
-
-* Antes de levantar este contenedor creamos un red llamada _i_cd_network_
-#### Build NetWork
-```sh
-docker network create i_cd_network
+#### Configurara Nexus para ir por http
+```json
+echo '{ "insecure-registries": [ "http://192.168.100.10/:8082","http://192.168.100.10/:8083" ] }' > /etc/docker/deamon.json | systemctl reaload docker
+echo '{ "insecure-registries": [ "IP_DE_NEXUS:8082","IP_DE_NEXUS:8082" ] }' > /etc/docker/deamon.json # systemctl reload docker
 ```
+## JENKINS IMAGE
+* Agregar el Plugin de Docker a Jenkins
+* Reutilizamos la red __i_cd_network__ previamente creada para conectar el contenedor de Jenkins con el de Nexus
 
 #### __Run Jenkins Imagen__
 
@@ -47,26 +47,21 @@ docker network create i_cd_network
 docker container run --network=ci_cd_network -u $(stat -c '%u:%g' /var/run/docker.sock) -d -p 8080:8080 -v jenkinsvol:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock --name jenkins-local jenkins/jenkins:lts
 ```
 
-- --network=ci_cd_network: Conecta el contenedor a una red Docker existente llamada ci_cd_network. Esto permite que el contenedor se comunique con otros contenedores en la misma red.
-
-- -u $(stat -c '%u:%g' /var/run/docker.sock): Establece el usuario y grupo del contenedor al mismo UID y GID que el archivo /var/run/docker.sock en el host. Esto es útil para permitir que el contenedor interactúe con el Docker daemon del host con los mismos permisos que el archivo docker.sock.
-
-- -d: Ejecuta el contenedor en modo "detached" (desconectado), lo que significa que el contenedor se ejecuta en segundo plano.
-
-- -p 8080:8080: Mapea el puerto 8080 del contenedor al puerto 8080 del host. Esto permite acceder a Jenkins desde el navegador web usando el puerto 8080 del host.
-
-- -v jenkinsvol:/var/jenkins_home: Monta un volumen Docker llamado jenkinsvol en /var/jenkins_home dentro del contenedor. /var/jenkins_home es el directorio donde Jenkins almacena su configuración y datos, por lo que montar un volumen aquí permite que esos datos persistan entre reinicios del contenedor.
-
-- -v /var/run/docker.sock:/var/run/docker.sock: Monta el socket de Docker del host dentro del contenedor. Esto permite que el contenedor ejecute comandos Docker, efectivamente controlando el Docker daemon del host. Es útil para crear y gestionar contenedores desde dentro del contenedor de Jenkins.
-
-- --name jenkins-local: Asigna el nombre jenkins-local al contenedor. Esto es útil para identificar y gestionar el contenedor con comandos Docker.
-
-- jenkins/jenkins:lts: Especifica la imagen Docker a usar, en este caso, la versión "Long Term Support" (LTS) de Jenkins
+| Comando                                 | Descripcion                                                                                                                                                                                                                   |
+|----------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --network=ci_cd_network                | Connects the container to an existing Docker network named ci_cd_network. This allows the container to communicate with other containers on the same network.                                                                 |
+| -u $(stat -c '%u:%g' /var/run/docker.sock) | Sets the user and group of the container to the same UID and GID as the /var/run/docker.sock file on the host. This is useful to allow the container to interact with the Docker daemon on the host with the same permissions as the docker.sock file. |
+| -d                                     | Runs the container in detached mode, meaning the container runs in the background.                                                                                                                                           |
+| -p 8080:8080                           | Maps port 8080 of the container to port 8080 of the host. This allows accessing Jenkins from a web browser using the host's port 8080.                                                                                      |
+| -v jenkinsvol:/var/jenkins_home        | Mounts a Docker volume named jenkinsvol to /var/jenkins_home inside the container. /var/jenkins_home is the directory where Jenkins stores its configuration and data, so mounting a volume here allows those data to persist between container restarts. |
+| -v /var/run/docker.sock:/var/run/docker.sock | Mounts the host's Docker socket inside the container. This allows the container to execute Docker commands, effectively controlling the host's Docker daemon. It is useful for creating and managing containers from within the Jenkins container. |
+| --name jenkins-local                    | Assigns the name jenkins-local to the container. This is useful for identifying and managing the container with Docker commands.                                                                                              |
+| jenkins/jenkins:lts                    | Specifies the Docker image to use, in this case, the Long Term Support (LTS) version of Jenkins.                                                                                                                            |
 
 ### Pasos de configuracion previos a ejecutar los Piplelines
 - Para poder correr piplelines que ejecuten comandos de docker debemos una vez levantado y configurado nuestro jenkins dentro del contenedor ejecutar estos comando para que pueda ver el docker local nuestro
 
-### Instalacion Docker en Contenedor
+#### Instalacion Docker en Contenedor
 ```sh
 apt-get update && \
 apt-get -y install apt-transport-https \
@@ -84,11 +79,11 @@ apt-get -y install docker-ce
 
 
 ```
-### Dar Permisos a jenkins
+#### Dar Permisos a jenkins
 ```sh
 usermod -aG docker jenkins
 ```
-### En caso de necesitar Compose en nuestro jenkins
+#### En caso de necesitar Compose en nuestro Jenkins
 ```sh
 curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
 ```
