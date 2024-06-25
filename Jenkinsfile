@@ -3,7 +3,7 @@ pipeline {
         /* Definimos las variables de entorno */
         IMAGEN = "nginx" /* Cambiamos el nombre de la imagen de Docker a nginx */
         USUARIO = 'NEXUS_CREDENTIAL' /* Nombre de usuario de Docker Hub */
-        NEXUS_GROUP= 'grupo13/pin1'
+        NEXUS_GROUP= 'grupo13/pin1' /* Grupo de PIN */
     }
     agent any /* Indicamos que el agente puede ser cualquiera de los disponibles, en este caso el que tenga Docker instalado */
     stages { /* Definimos las etapas del pipeline */
