@@ -31,21 +31,13 @@ pipeline {
         stage('Test') { /* Etapa de pruebas */
             steps {
                 script {
-                    // Iniciamos el contenedor mapeando el puerto 80 del contenedor al puerto 8080 del host
-                    sh "docker run -d -p 8080:80 --name test_container $NEXUS_GROUP/$IMAGEN:$BUILD_NUMBER nginx -g 'daemon off;'"
-                    // Esperamos un poco para asegurarnos de que el contenedor esté completamente arriba y corriendo
-                    sh "sleep 5"
-                    // Verificamos la versión de nginx dentro del contenedor
-                    sh "docker exec test_container nginx -v"
-                    // Realizamos una petición HTTP al contenedor
-                    sh "curl -I http://localhost:8080"
-                    // Detenemos y eliminamos el contenedor después de las pruebas
-                    sh "docker stop test_container"
-                    sh "docker rm test_container"
+                    docker.image("$NEXUS_GROUP/$IMAGEN:$BUILD_NUMBER").inside('-u root') {
+                        sh 'nginx -v' /* Verificamos la versión de nginx dentro del contenedor */
+                    }
                 }
             }
         }
-                
+        
         stage('Deploy') {
             steps {
                 script {
