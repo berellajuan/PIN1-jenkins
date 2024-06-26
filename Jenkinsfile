@@ -33,6 +33,7 @@ pipeline {
                 script {
                     docker.image("$NEXUS_GROUP/$IMAGEN:$BUILD_NUMBER").inside('-u root') { /* Mapeamos el puerto 80 del contenedor al puerto 8080 del host */
                         sh 'nginx -v' /* Verificamos la versión de nginx dentro del contenedor */
+                        sh 'curl -I http://localhost' /* Realizamos una petición HTTP al contenedor */
                     }
                 }
             }
