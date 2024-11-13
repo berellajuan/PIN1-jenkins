@@ -9,7 +9,7 @@ pipeline {
     stages { /* Definimos las etapas del pipeline */
         stage('Clone') { /* Etapa de clonación del repositorio */
             steps {
-                git branch: "main", url: 'https://github.com/berellajuan/pipileline-deploy-nexus-repository.git'
+                git branch: "main", url: 'https://github.com/berellajuan/PIN1-jenkins.git'
             }
         }
         stage('Build') { /* Etapa de construcción de la imagen de Docker */
